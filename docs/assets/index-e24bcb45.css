@@ -1,0 +1,1 @@
+body{height:100vh;display:flex;place-items:center}.wrapper{margin:0 auto;display:flex;align-items:center;flex-direction:column}.wrapper .input-wrapper{display:flex;align-items:center}.wrapper button{margin:20px}.wrapper input{height:40px;font-size:20px;width:80px}
