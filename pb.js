@@ -1,9 +1,9 @@
 import PocketBase from "pocketbase";
-import { DBip } from "./constants";
 
 // Declaration
 
-const pb = new PocketBase(DBip);
+const pb = new PocketBase(import.meta.env.VITE_DB_IP);
+pb.autoCancellation(false);
 
 const button = document
   .querySelector("#submit")
@@ -14,7 +14,7 @@ const textarea = document.querySelector("#textarea");
 // Get from DB
 
 async function getFromDB() {
-  const records = await pb.collection("words").getFullList({
+  const records = await pb.collection("words_test").getFullList({
     sort: "-created",
   });
 
@@ -27,7 +27,7 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-// Insert in text area
+// // Insert in text area
 
 async function showWords() {
   const records = await getFromDB();
@@ -37,7 +37,7 @@ async function showWords() {
     let currentElem = getRandomInt(records.length - 1);
 
     for (let i = 0; i < records.length; i++) {
-      if (records[currentElem].isAdded == false) {
+      if (records[currentElem].isAdded == true) {
         currentElem = getRandomInt(records.length - 1);
       } else {
         break;
@@ -54,7 +54,7 @@ async function updateData(elem) {
   console.log(`${elem.id} has been updated`);
 
   try {
-    await pb.collection("words").update(elem.id, elem);
+    await pb.collection("words_test").update(elem.id, elem);
   } catch (err) {
     alert(err);
     alert(`${elem} has not been updated`);
