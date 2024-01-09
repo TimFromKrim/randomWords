@@ -5,20 +5,19 @@ import PocketBase from "pocketbase";
 const pb = new PocketBase(import.meta.env.VITE_DB_IP);
 pb.autoCancellation(false);
 
-const button = document
-  .querySelector("#submit")
-  .addEventListener("click", showWords);
+const button = document.querySelector("#submit");
+button.addEventListener("click", showWords);
 const input = document.querySelector("input");
 const textarea = document.querySelector("#textarea");
 
 // Get from DB
 
 async function getFromDB() {
-  const records = await pb.collection("words_test").getFullList({
-    sort: "-created",
+  const record = await pb.collection("words").getFirstListItem(`isAdded="0"`, {
+    sort: "@random",
   });
 
-  return records;
+  return record;
 }
 
 // Random generation
@@ -27,36 +26,30 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-// // Insert in text area
+// Insert in text area
 
 async function showWords() {
-  const records = await getFromDB();
+  button.disabled = true;
   textarea.value = "";
 
   for (let i = 0; i < input.value; i++) {
-    let currentElem = getRandomInt(records.length - 1);
+    try {
+      const res = await getFromDB();
 
-    for (let i = 0; i < records.length; i++) {
-      if (records[currentElem].isAdded == true) {
-        currentElem = getRandomInt(records.length - 1);
-      } else {
-        break;
+      textarea.value += `${res.word}\n`;
+      console.log(res.word);
+
+      res.isAdded = true;
+      await pb.collection("words").update(res.id, res);
+
+      const test = await pb.collection("words").getOne(res.id);
+      if (test.isAdded) {
+        console.log(`"\x1B[34m${test.word}"`, "marked successfully");
       }
+    } catch {
+      i--;
+      continue;
     }
-
-    textarea.value += `${records[currentElem].word}\n`;
-    updateData(records[currentElem]);
   }
-}
-
-async function updateData(elem) {
-  elem.isAdded = true;
-  console.log(`${elem.id} has been updated`);
-
-  try {
-    await pb.collection("words_test").update(elem.id, elem);
-  } catch (err) {
-    alert(err);
-    alert(`${elem} has not been updated`);
-  }
+  button.disabled = false;
 }
