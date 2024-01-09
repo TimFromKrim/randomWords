@@ -1,8 +1,9 @@
 import PocketBase from "pocketbase";
+import { DBip } from "./constants";
 
 // Declaration
 
-const pb = new PocketBase("http://127.0.0.1:8090");
+const pb = new PocketBase(DBip);
 
 const button = document
   .querySelector("#submit")
@@ -12,9 +13,13 @@ const textarea = document.querySelector("#textarea");
 
 // Get from DB
 
-const records = await pb.collection("words").getFullList({
-  sort: "-created",
-});
+async function getFromDB() {
+  const records = await pb.collection("words").getFullList({
+    sort: "-created",
+  });
+
+  return records;
+}
 
 // Random generation
 
@@ -24,7 +29,8 @@ function getRandomInt(max) {
 
 // Insert in text area
 
-function showWords() {
+async function showWords() {
+  const records = await getFromDB();
   textarea.value = "";
 
   for (let i = 0; i < input.value; i++) {
